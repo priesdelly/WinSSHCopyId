@@ -62,9 +62,10 @@
             this.mainGroupBox.Controls.Add(this.label1);
             this.mainGroupBox.Location = new System.Drawing.Point(12, 12);
             this.mainGroupBox.Name = "mainGroupBox";
-            this.mainGroupBox.Size = new System.Drawing.Size(560, 424);
+            this.mainGroupBox.Size = new System.Drawing.Size(556, 420);
             this.mainGroupBox.TabIndex = 0;
             this.mainGroupBox.TabStop = false;
+            this.mainGroupBox.Text = "Information";
             // 
             // label3
             // 
@@ -78,7 +79,7 @@
             // btnCopy
             // 
             this.btnCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCopy.Location = new System.Drawing.Point(476, 393);
+            this.btnCopy.Location = new System.Drawing.Point(472, 389);
             this.btnCopy.Name = "btnCopy";
             this.btnCopy.Size = new System.Drawing.Size(75, 23);
             this.btnCopy.TabIndex = 5;
@@ -106,7 +107,7 @@
             this.txtConsole.Name = "txtConsole";
             this.txtConsole.ReadOnly = true;
             this.txtConsole.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtConsole.Size = new System.Drawing.Size(541, 183);
+            this.txtConsole.Size = new System.Drawing.Size(537, 179);
             this.txtConsole.TabIndex = 999;
             // 
             // txtPublicKey
@@ -117,7 +118,7 @@
             this.txtPublicKey.Multiline = true;
             this.txtPublicKey.Name = "txtPublicKey";
             this.txtPublicKey.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtPublicKey.Size = new System.Drawing.Size(545, 91);
+            this.txtPublicKey.Size = new System.Drawing.Size(541, 91);
             this.txtPublicKey.TabIndex = 4;
             // 
             // txtPassword
@@ -181,8 +182,11 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 446);
             this.Controls.Add(this.mainGroupBox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(600, 39);
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(600, 485);
+            this.MinimumSize = new System.Drawing.Size(600, 485);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "WinSSHCopyId";
