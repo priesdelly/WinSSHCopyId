@@ -16,21 +16,27 @@ The motivation behind creating WinSSHCopyId is to provide Windows users with a s
 
 ### Prerequisites
 
-- .NET Framework 4.7.2 or later
+- .NET Framework 4.8 or later
 - Visual Studio 2019 or later
 
-### Steps
+### Steps for Developers
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/WinSSHCopyId.git
+    git clone https://github.com/priesdelly/WinSSHCopyId.git
     ```
 2. Open the solution file `WinSSHCopyId.sln` in Visual Studio.
 3. Build the solution to restore the NuGet packages and compile the project.
 
+### Steps for Normal Users
+
+1. Go to the [Releases](https://github.com/priesdelly/WinSSHCopyId/releases) section of the GitHub repository.
+2. Download the latest release of the application.
+3. Extract the downloaded files and run `WinSSHCopyId.exe`.
+
 ## Usage
 
-1. Run the application by pressing `F5` in Visual Studio or by executing the compiled `.exe` file.
+1. Run the application by executing the `WinSSHCopyId.exe` file.
 2. Enter the following details in the respective fields:
     - **Host**: The hostname or IP address of the remote server.
     - **Username**: The username to log in to the remote server.
