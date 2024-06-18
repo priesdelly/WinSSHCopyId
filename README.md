@@ -76,4 +76,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Contact
 
-For any questions or feedback, please open an issue on the [GitHub repository](https://github.com/yourusername/WinSSHCopyId).
+For any questions or feedback, please open an issue on the [GitHub repository](https://github.com/priesdelly/WinSSHCopyId).
