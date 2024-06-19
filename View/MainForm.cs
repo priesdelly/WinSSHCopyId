@@ -1,8 +1,8 @@
-﻿using Renci.SshNet;
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using WinSSHCopyId.Engine;
 
 namespace WinSSHCopyId
 {
@@ -39,32 +39,13 @@ namespace WinSSHCopyId
 
             try
             {
-                using (var client = new SshClient(host, username, password))
+                var sshCopyEngine = new SSHCopyEngine(host, username, password, publicKey);
+                sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
+                sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
+                var err = sshCopyEngine.Copy();
+                if (err != null)
                 {
-                    client.Connect();
-                    Log("Successfully connected to the server.");
-
-                    var cmd = client.RunCommand("echo 'A connection was successfully established with the server' ");
-                    Log(cmd.Result);
-
-                    client.RunCommand("mkdir -p ~/.ssh");
-                    var checkCommand = $"grep -q \"{publicKey}\" ~/.ssh/authorized_keys";
-                    var checkResult = client.RunCommand(checkCommand);
-
-                    if (checkResult.ExitStatus == 0)
-                    {
-                        Log("Public key already exists in authorized_keys.");
-                    }
-                    else
-                    {
-                        var appendCommand = $"echo \"{publicKey}\" >> ~/.ssh/authorized_keys";
-                        var appendResult = client.RunCommand(appendCommand);
-
-                        Log(appendResult.ExitStatus == 0
-                            ? "Public key successfully added to authorized_keys."
-                            : $"Failed to add public key to authorized_keys: {appendResult.Error}");
-                    }
-                    client.Disconnect();
+                    throw err;
                 }
 
                 SaveFormData(host, username, publicKey);
@@ -73,6 +54,11 @@ namespace WinSSHCopyId
             {
                 Log($"Exception occurred: {ex.Message}");
             }
+        }
+
+        private void SshCopyEngine_LogEventHandler(string msg)
+        {
+            Log(msg);
         }
 
         #region "METHOD"
@@ -84,8 +70,6 @@ namespace WinSSHCopyId
             {
                 _sb.Append(Environment.NewLine);
             }
-            _sb.Append(DateTime.Now.ToString("[HH:mm:ss.fff]"));
-            _sb.Append(" - ");
             _sb.Append(msg.Trim());
             txtConsole.AppendText(_sb.ToString());
             txtConsole.ScrollToCaret();
