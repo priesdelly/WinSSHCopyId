@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
 using WinSSHCopyId.Engine;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace WinSSHCopyId
 {
@@ -10,11 +12,17 @@ namespace WinSSHCopyId
     {
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly string _filePath;
+        private readonly SSHCopyIdEngine sshCopyEngine;
 
         public MainForm()
         {
             InitializeComponent();
+
             _filePath = Path.Combine(Path.GetTempPath(), "WinSSHCopyId.txt");
+
+            sshCopyEngine = new SSHCopyIdEngine();
+            sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
+            sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -39,9 +47,11 @@ namespace WinSSHCopyId
 
             try
             {
-                var sshCopyEngine = new SSHCopyIdEngine(host, username, password, publicKey);
-                sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
-                sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
+                sshCopyEngine.Host = host;
+                sshCopyEngine.Username = username;
+                sshCopyEngine.Password = password;
+                sshCopyEngine.PublicKey = publicKey;
+
                 var err = sshCopyEngine.Copy();
                 if (err != null)
                 {

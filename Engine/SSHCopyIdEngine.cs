@@ -7,14 +7,19 @@ namespace WinSSHCopyId.Engine
     public class SSHCopyIdEngine
     {
         public delegate void RaiseLogEvent(string message);
+
         public event RaiseLogEvent LogEventHandler;
-        
+
         public string Host { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string PublicKey { get; set; }
-        
+
         private readonly StringBuilder _sb = new StringBuilder();
+
+        public SSHCopyIdEngine()
+        {
+        }
 
         public SSHCopyIdEngine(string host, string username, string password, string publicKey)
         {
@@ -23,7 +28,7 @@ namespace WinSSHCopyId.Engine
             Password = password;
             PublicKey = publicKey;
         }
-        
+
         public Exception Copy()
         {
             using (var client = new SshClient(Host, Username, Password))

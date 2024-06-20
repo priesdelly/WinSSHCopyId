@@ -79,7 +79,6 @@ namespace WinSSHCopyId.Engine
             return _sb.ToString();
         }
 
-
         private void ArgumentParsing(string[] args)
         {
             for (var i = 0; i < args.Length; i++)
