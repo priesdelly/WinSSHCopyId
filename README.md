@@ -5,6 +5,7 @@ WinSSHCopyId is a Windows application developed in C# that provides an easy way 
 ## Features
 
 - **WinForm Interface**: User-friendly graphical interface for easy SSH key management.
+- **CLI Mode**: Command-line interface for advanced users.
 - **C# Language**: Developed using C# for seamless integration with Windows.
 - **SSH Key Management**: Automatically adds SSH public keys to the `authorized_keys` file on the remote server.
 
@@ -35,7 +36,7 @@ The motivation behind creating WinSSHCopyId is to provide Windows users with a s
 3. Extract the downloaded files and run `WinSSHCopyId.exe`.
 
 ## Usage
-
+### GUI Mode
 1. Run the application by executing the `WinSSHCopyId.exe` file.
 2. Enter the following details in the respective fields:
     - **Host**: The hostname or IP address of the remote server.
@@ -44,16 +45,42 @@ The motivation behind creating WinSSHCopyId is to provide Windows users with a s
     - **Public Key**: The SSH public key to be added to the remote server.
 3. Click the `Copy` button to add the public key to the `authorized_keys` file on the remote server.
 
+### CLI Mode
+#### Basic Usage
+
+1. Open a command prompt.
+2. Run the application with the required arguments:
+    ```bash
+    WinSSHCopyId.exe -i <PublicKeyPath> <username>@<host>
+    ```
+    or quiet mode (`-q`) (**Require put password in cli argument**)
+
+    ```bash
+    WinSSHCopyId.exe -q -i <PublicKeyPath> <username>:<password>@<host>
+    ```
+3. Enter the password when prompted.
+
 ## Example
 
 Here is an example of how to use WinSSHCopyId:
 
+### GUI Mode
 1. Enter the remote server details:
     - Host: `example.com`
     - Username: `user`
+    - Password: `bla bla bla password...`
     - Public Key: `ssh-rsa AAAAB3Nza...`
 2. Click `Copy`.
 3. The application will log the process in the console window, indicating whether the key was successfully added or if it already exists.
+
+### CLI Mode
+```bash
+WinSSHCopyId.exe -i C:\Users\John\.ssh\id_rsa.pub john@ubuntu-linux
+```
+or quiet mode (`-q`)
+```bash
+WinSSHCopyId.exe -q -i C:\Users\John\.ssh\id_rsa.pub john:password1234@ubuntu-linux
+```
 
 ## Contributing
 
