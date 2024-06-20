@@ -39,7 +39,7 @@ namespace WinSSHCopyId
 
             try
             {
-                var sshCopyEngine = new SSHCopyEngine(host, username, password, publicKey);
+                var sshCopyEngine = new SSHCopyIdEngine(host, username, password, publicKey);
                 sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
                 sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
                 var err = sshCopyEngine.Copy();

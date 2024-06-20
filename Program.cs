@@ -1,29 +1,28 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WinSSHCopyId.Engine;
-using WinSSHCopyId.Repository;
 
 namespace WinSSHCopyId
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern int FreeConsole();
+
         [STAThread]
-        private static int Main()
+        private static void Main(string[] args)
         {
-            var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
             {
-                return new CLIEngine().Run(args);
+                new CLIEngine().Run(args);
+                return;
             }
 
-            WindowsAPI.FreeConsole();
+            FreeConsole();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
-            return 1;
         }
     }
 }

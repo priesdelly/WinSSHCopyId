@@ -1,57 +1,48 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace WinSSHCopyId.Engine
 {
     public class CLIEngine
     {
-        private StringBuilder _sb = new StringBuilder();
+        private readonly StringBuilder _sb = new StringBuilder();
+
+        private string _host = null;
+        private string _username = null;
+        private string _password = null;
+        private string _publicKeyPath = null;
+        private string _publicKey = null;
 
         public int Run(string[] args)
         {
-            string host = null;
-            string username = null;
-            string password = null;
-            string publicKeyPath = null;
-            string publicKey = null;
-
             try
             {
-                // Argument parsing
-                for (var i = 0; i < args.Length; i++)
-                {
-                    if (args[i] == "-i" && i + 1 < args.Length)
-                    {
-                        publicKeyPath = args[++i];
-                    }
-                    else if (args[i].Contains("@"))
-                    {
-                        var parts = args[i].Split('@');
-                        if (parts.Length != 2)
-                        {
-                            continue;
-                        }
+                Console.WriteLine("=== WinSSHCopyId ===");
+                Console.WriteLine("Argument: {0}", FlattedArgs(args));
 
-                        username = parts[0];
-                        host = parts[1];
-                    }
-                }
+                ArgumentParsing(args);
 
-                if (string.IsNullOrWhiteSpace(host)
-                    || string.IsNullOrWhiteSpace(username)
-                    || string.IsNullOrWhiteSpace(publicKeyPath))
+                if (string.IsNullOrWhiteSpace(_host)
+                    || string.IsNullOrWhiteSpace(_username)
+                    || string.IsNullOrWhiteSpace(_publicKeyPath))
                 {
-                    Console.WriteLine("Usage: WinSSHCopyId.exe -i <PublicKeyPath: C:\\Users\\Peter\\.ssh\\id_rsa.pub> <username>@<host>");
+                    Console.WriteLine("Invalid Arguments!");
+                    Console.WriteLine("[1] Usage: WinSSHCopyId.exe -i <PublicKeyPath: C:\\Users\\John\\.ssh\\id_rsa.pub> <username>@<host>");
+                    Console.WriteLine("[2] Usage: WinSSHCopyId.exe -q -i <PublicKeyPath: C:\\Users\\John\\.ssh\\id_rsa.pub> <username>:<password>@<host>");
                     return 0;
                 }
 
-                publicKey = File.ReadAllText(publicKeyPath);
+                _publicKey = File.ReadAllText(_publicKeyPath);
 
-                Console.Write("Enter password: ");
-                password = ReadPassword();
+                if (!args.Contains("-q"))
+                {
+                    Console.Write("Enter password: ");
+                    _password = ReadPassword();
+                }
 
-                var sshCopyEngine = new SSHCopyEngine(host, username, password, publicKey);
+                var sshCopyEngine = new SSHCopyIdEngine(_host, _username, _password, _publicKey);
                 sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
                 sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
                 var err = sshCopyEngine.Copy();
@@ -65,16 +56,66 @@ namespace WinSSHCopyId.Engine
                 Console.WriteLine(ex.Message);
                 return 0;
             }
+            finally
+            {
+                if (!args.Contains("-q"))
+                {
+                    Console.WriteLine("Press any key to continue ...");
+                    Console.ReadKey();
+                }
+            }
 
             return 1;
+        }
+
+        private string FlattedArgs(string[] args)
+        {
+            _sb.Clear();
+            foreach (var item in args)
+            {
+                _sb.AppendFormat("{0} ", item);
+            }
+
+            return _sb.ToString();
+        }
+
+
+        private void ArgumentParsing(string[] args)
+        {
+            for (var i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "-i" && i + 1 < args.Length)
+                {
+                    _publicKeyPath = args[++i];
+                }
+                else if (args[i].Contains("@"))
+                {
+                    var parts = args[i].Split('@');
+                    if (parts.Length != 2)
+                    {
+                        continue;
+                    }
+
+                    if (parts[0].Contains(":"))
+                    {
+                        var authPath = parts[0].Split(':');
+                        _password = authPath[1];
+                        _username = authPath[0];
+                    }
+                    else
+                    {
+                        _username = parts[0];
+                    }
+
+                    _host = parts[1];
+                }
+            }
         }
 
         private void SshCopyEngine_LogEventHandler(string msg)
         {
             Console.WriteLine(msg);
         }
-
-        #region "Method"
 
         private string ReadPassword()
         {
@@ -94,6 +135,7 @@ namespace WinSSHCopyId.Engine
                     {
                         continue;
                     }
+
                     _sb.Remove(_sb.Length - 1, 1);
                     Console.Write("\b \b");
                 }
@@ -103,9 +145,8 @@ namespace WinSSHCopyId.Engine
                     Console.Write("*");
                 }
             }
+
             return _sb.ToString();
         }
-
-        #endregion "Method"
     }
 }
