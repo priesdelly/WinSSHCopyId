@@ -1,16 +1,25 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using WinSSHCopyId.Engine;
 
 namespace WinSSHCopyId
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern int FreeConsole();
+
         [STAThread]
-        private static void Main()
+        private static void Main(string[] args)
         {
+            if (args.Length > 1)
+            {
+                new CLIEngine().Run(args);
+                return;
+            }
+
+            FreeConsole();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

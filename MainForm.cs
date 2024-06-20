@@ -1,8 +1,10 @@
-﻿using Renci.SshNet;
-using System;
+﻿using System;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
+using WinSSHCopyId.Engine;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace WinSSHCopyId
 {
@@ -10,11 +12,17 @@ namespace WinSSHCopyId
     {
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly string _filePath;
+        private readonly SSHCopyIdEngine sshCopyEngine;
 
         public MainForm()
         {
             InitializeComponent();
+
             _filePath = Path.Combine(Path.GetTempPath(), "WinSSHCopyId.txt");
+
+            sshCopyEngine = new SSHCopyIdEngine();
+            sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
+            sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -39,32 +47,15 @@ namespace WinSSHCopyId
 
             try
             {
-                using (var client = new SshClient(host, username, password))
+                sshCopyEngine.Host = host;
+                sshCopyEngine.Username = username;
+                sshCopyEngine.Password = password;
+                sshCopyEngine.PublicKey = publicKey;
+
+                var err = sshCopyEngine.Copy();
+                if (err != null)
                 {
-                    client.Connect();
-                    Log("Successfully connected to the server.");
-
-                    var cmd = client.RunCommand("echo 'A connection was successfully established with the server' ");
-                    Log(cmd.Result);
-
-                    client.RunCommand("mkdir -p ~/.ssh");
-                    var checkCommand = $"grep -q \"{publicKey}\" ~/.ssh/authorized_keys";
-                    var checkResult = client.RunCommand(checkCommand);
-
-                    if (checkResult.ExitStatus == 0)
-                    {
-                        Log("Public key already exists in authorized_keys.");
-                    }
-                    else
-                    {
-                        var appendCommand = $"echo \"{publicKey}\" >> ~/.ssh/authorized_keys";
-                        var appendResult = client.RunCommand(appendCommand);
-
-                        Log(appendResult.ExitStatus == 0
-                            ? "Public key successfully added to authorized_keys."
-                            : $"Failed to add public key to authorized_keys: {appendResult.Error}");
-                    }
-                    client.Disconnect();
+                    throw err;
                 }
 
                 SaveFormData(host, username, publicKey);
@@ -73,6 +64,11 @@ namespace WinSSHCopyId
             {
                 Log($"Exception occurred: {ex.Message}");
             }
+        }
+
+        private void SshCopyEngine_LogEventHandler(string msg)
+        {
+            Log(msg);
         }
 
         #region "METHOD"
@@ -84,8 +80,6 @@ namespace WinSSHCopyId
             {
                 _sb.Append(Environment.NewLine);
             }
-            _sb.Append(DateTime.Now.ToString("[HH:mm:ss.fff]"));
-            _sb.Append(" - ");
             _sb.Append(msg.Trim());
             txtConsole.AppendText(_sb.ToString());
             txtConsole.ScrollToCaret();
