@@ -13,7 +13,7 @@ namespace WinSSHCopyId
         private readonly string _filePath;
         private readonly SSHCopyIdEngine _sshCopyEngine;
         private readonly Timer _timerBtn = new Timer();
-        private bool isProcessing;
+        private bool _isProcessing;
 
         public MainForm()
         {
@@ -22,8 +22,8 @@ namespace WinSSHCopyId
             _filePath = Path.Combine(Path.GetTempPath(), "WinSSHCopyId.txt");
 
             _timerBtn.Interval = 1000;
-            _timerBtn.Tick -= _timer_Tick;
-            _timerBtn.Tick += _timer_Tick;
+            _timerBtn.Tick -= TimerBtn_Tick;
+            _timerBtn.Tick += TimerBtn_Tick;
 
             _sshCopyEngine = new SSHCopyIdEngine();
             _sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
@@ -43,7 +43,7 @@ namespace WinSSHCopyId
             _ = DoCopy();
         }
 
-        private void _timer_Tick(object sender, EventArgs e)
+        private void TimerBtn_Tick(object sender, EventArgs e)
         {
             btnCopy.Enabled = true;
             _timerBtn.Stop();
@@ -56,7 +56,7 @@ namespace WinSSHCopyId
 
         private async Task DoCopy()
         {
-            if (isProcessing)
+            if (_isProcessing)
             {
                 return;
             }
@@ -83,7 +83,7 @@ namespace WinSSHCopyId
 
                 Log("Try connecting...");
 
-                isProcessing = true;
+                _isProcessing = true;
 
                 await _sshCopyEngine.CopyAsync();
 
@@ -95,7 +95,7 @@ namespace WinSSHCopyId
             }
             finally
             {
-                isProcessing = false;
+                _isProcessing = false;
             }
         }
 
