@@ -120,6 +120,7 @@ namespace WinSSHCopyId.Engine
             {
                 args[i] = args[i].Trim().Replace("\r\n", "");
             }
+
             return args;
         }
 

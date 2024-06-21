@@ -10,9 +10,9 @@ namespace WinSSHCopyId
     public partial class MainForm : Form
     {
         private readonly StringBuilder _sb = new StringBuilder();
-        private readonly string _filePath;
         private readonly SSHCopyIdEngine _sshCopyEngine;
         private readonly Timer _timerBtn = new Timer();
+        private readonly string _filePath;
         private bool _isProcessing;
 
         public MainForm()
