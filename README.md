@@ -53,7 +53,7 @@ The motivation behind creating WinSSHCopyId is to provide Windows users with a s
     ```bash
     WinSSHCopyId.exe -i <PublicKeyPath> <username>@<host>
     ```
-    or quiet mode (`-q`) (**Require put password in cli argument**)
+    or in quiet mode (`-q`) (**requires password in CLI argument**):
 
     ```bash
     WinSSHCopyId.exe -q -i <PublicKeyPath> <username>:<password>@<host>
@@ -77,7 +77,7 @@ Here is an example of how to use WinSSHCopyId:
 ```bash
 WinSSHCopyId.exe -i C:\Users\John\.ssh\id_rsa.pub john@ubuntu-linux
 ```
-or quiet mode (`-q`)
+or in quiet mode (`-q`)
 ```bash
 WinSSHCopyId.exe -q -i C:\Users\John\.ssh\id_rsa.pub john:password1234@ubuntu-linux
 ```
