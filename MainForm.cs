@@ -1,18 +1,19 @@
 ﻿using System;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using WinSSHCopyId.Engine;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace WinSSHCopyId
 {
     public partial class MainForm : Form
     {
         private readonly StringBuilder _sb = new StringBuilder();
+        private readonly SSHCopyIdEngine _sshCopyEngine;
+        private readonly Timer _timerBtn = new Timer();
         private readonly string _filePath;
-        private readonly SSHCopyIdEngine sshCopyEngine;
+        private bool _isProcessing;
 
         public MainForm()
         {
@@ -20,9 +21,13 @@ namespace WinSSHCopyId
 
             _filePath = Path.Combine(Path.GetTempPath(), "WinSSHCopyId.txt");
 
-            sshCopyEngine = new SSHCopyIdEngine();
-            sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
-            sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
+            _timerBtn.Interval = 1000;
+            _timerBtn.Tick -= TimerBtn_Tick;
+            _timerBtn.Tick += TimerBtn_Tick;
+
+            _sshCopyEngine = new SSHCopyIdEngine();
+            _sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
+            _sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -32,6 +37,30 @@ namespace WinSSHCopyId
 
         private void btnCopy_Click(object sender, EventArgs e)
         {
+            _timerBtn.Start();
+            btnCopy.Enabled = false;
+
+            _ = DoCopy();
+        }
+
+        private void TimerBtn_Tick(object sender, EventArgs e)
+        {
+            btnCopy.Enabled = true;
+            _timerBtn.Stop();
+        }
+
+        private void SshCopyEngine_LogEventHandler(string msg)
+        {
+            Invoke(new Action(() => Log(msg)));
+        }
+
+        private async Task DoCopy()
+        {
+            if (_isProcessing)
+            {
+                return;
+            }
+
             ClearLog();
 
             if (AreInputsEmpty())
@@ -47,16 +76,16 @@ namespace WinSSHCopyId
 
             try
             {
-                sshCopyEngine.Host = host;
-                sshCopyEngine.Username = username;
-                sshCopyEngine.Password = password;
-                sshCopyEngine.PublicKey = publicKey;
+                _sshCopyEngine.Host = host;
+                _sshCopyEngine.Username = username;
+                _sshCopyEngine.Password = password;
+                _sshCopyEngine.PublicKey = publicKey;
 
-                var err = sshCopyEngine.Copy();
-                if (err != null)
-                {
-                    throw err;
-                }
+                Log("Try connecting...");
+
+                _isProcessing = true;
+
+                await _sshCopyEngine.CopyAsync();
 
                 SaveFormData(host, username, publicKey);
             }
@@ -64,14 +93,11 @@ namespace WinSSHCopyId
             {
                 Log($"Exception occurred: {ex.Message}");
             }
+            finally
+            {
+                _isProcessing = false;
+            }
         }
-
-        private void SshCopyEngine_LogEventHandler(string msg)
-        {
-            Log(msg);
-        }
-
-        #region "METHOD"
 
         private void Log(string msg)
         {
@@ -80,6 +106,9 @@ namespace WinSSHCopyId
             {
                 _sb.Append(Environment.NewLine);
             }
+
+            _sb.Append(DateTime.Now.ToString("[HH:mm:ss.fff]"));
+            _sb.Append(" - ");
             _sb.Append(msg.Trim());
             txtConsole.AppendText(_sb.ToString());
             txtConsole.ScrollToCaret();
@@ -89,7 +118,10 @@ namespace WinSSHCopyId
         {
             try
             {
-                if (!File.Exists(_filePath)) return;
+                if (!File.Exists(_filePath))
+                {
+                    return;
+                }
 
                 var content = File.ReadAllLines(_filePath);
                 if (content.Length > 0) txtHost.Text = content[0];
@@ -107,7 +139,6 @@ namespace WinSSHCopyId
             try
             {
                 File.WriteAllText(_filePath, $"{host}\n{username}\n{publicKey}");
-                Log("Form data saved successfully.");
             }
             catch (Exception ex)
             {
@@ -126,7 +157,5 @@ namespace WinSSHCopyId
         {
             txtConsole.Clear();
         }
-
-        #endregion "METHOD"
     }
 }

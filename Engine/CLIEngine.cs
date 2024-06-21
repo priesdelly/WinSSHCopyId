@@ -9,18 +9,20 @@ namespace WinSSHCopyId.Engine
     {
         private readonly StringBuilder _sb = new StringBuilder();
 
-        private string _host = null;
-        private string _username = null;
-        private string _password = null;
-        private string _publicKeyPath = null;
-        private string _publicKey = null;
+        private string _host;
+        private string _username;
+        private string _password;
+        private string _publicKeyPath;
+        private string _publicKey;
 
-        public int Run(string[] args)
+        public void Run(string[] args)
         {
             try
             {
-                Console.WriteLine("=== WinSSHCopyId ===");
-                Console.WriteLine("Argument: {0}", FlattedArgs(args));
+                args = CleanUp(args);
+
+                Log("=== WinSSHCopyId ===");
+                Log($"Argument: {FlattedArgs(args)}");
 
                 ArgumentParsing(args);
 
@@ -28,44 +30,98 @@ namespace WinSSHCopyId.Engine
                     || string.IsNullOrWhiteSpace(_username)
                     || string.IsNullOrWhiteSpace(_publicKeyPath))
                 {
-                    Console.WriteLine("Invalid Arguments!");
-                    Console.WriteLine("[1] Usage: WinSSHCopyId.exe -i <PublicKeyPath: C:\\Users\\John\\.ssh\\id_rsa.pub> <username>@<host>");
-                    Console.WriteLine("[2] Usage: WinSSHCopyId.exe -q -i <PublicKeyPath: C:\\Users\\John\\.ssh\\id_rsa.pub> <username>:<password>@<host>");
-                    return 0;
+                    Log("Invalid Arguments!");
+                    Log("[1] Usage: WinSSHCopyId.exe -i <PublicKeyPath: C:\\Users\\John\\.ssh\\id_rsa.pub> <username>@<host>");
+                    Log("[2] Usage: WinSSHCopyId.exe -q -i <PublicKeyPath: C:\\Users\\John\\.ssh\\id_rsa.pub> <username>:<password>@<host>");
+                    return;
                 }
 
                 _publicKey = File.ReadAllText(_publicKeyPath);
 
                 if (!args.Contains("-q"))
                 {
-                    Console.Write("Enter password: ");
+                    Console.Write($"{CurTimeString()} - Enter password: ");
                     _password = ReadPassword();
                 }
 
                 var sshCopyEngine = new SSHCopyIdEngine(_host, _username, _password, _publicKey);
                 sshCopyEngine.LogEventHandler -= SshCopyEngine_LogEventHandler;
                 sshCopyEngine.LogEventHandler += SshCopyEngine_LogEventHandler;
-                var err = sshCopyEngine.Copy();
-                if (err != null)
-                {
-                    throw err;
-                }
+                sshCopyEngine.Copy();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return 0;
+                Log(ex.Message);
             }
             finally
             {
                 if (!args.Contains("-q"))
                 {
-                    Console.WriteLine("Press any key to continue ...");
+                    Log("Press any key to continue ...");
                     Console.ReadKey();
                 }
             }
+        }
 
-            return 1;
+        private static string CurTimeString()
+        {
+            return DateTime.Now.ToString("[HH:mm:ss.fff]");
+        }
+
+        private void SshCopyEngine_LogEventHandler(string msg)
+        {
+            Log(msg);
+        }
+
+        private void Log(string msg)
+        {
+            _sb.Clear();
+            _sb.Append(CurTimeString());
+            _sb.Append(" - ");
+            _sb.Append(msg.Trim());
+            Console.WriteLine(_sb.ToString());
+        }
+
+        private string ReadPassword()
+        {
+            _sb.Clear();
+            while (true)
+            {
+                var info = Console.ReadKey(true);
+                if (info.Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine();
+                    break;
+                }
+
+                if (info.Key == ConsoleKey.Backspace)
+                {
+                    if (_sb.Length <= 0)
+                    {
+                        continue;
+                    }
+
+                    _sb.Remove(_sb.Length - 1, 1);
+                    Console.Write("\b \b");
+                }
+                else
+                {
+                    _sb.Append(info.KeyChar);
+                    Console.Write("*");
+                }
+            }
+
+            return _sb.ToString();
+        }
+
+        private static string[] CleanUp(string[] args)
+        {
+            for (var i = 0; i < args.Length; i++)
+            {
+                args[i] = args[i].Trim().Replace("\r\n", "");
+            }
+
+            return args;
         }
 
         private string FlattedArgs(string[] args)
@@ -109,43 +165,6 @@ namespace WinSSHCopyId.Engine
                     _host = parts[1];
                 }
             }
-        }
-
-        private void SshCopyEngine_LogEventHandler(string msg)
-        {
-            Console.WriteLine(msg);
-        }
-
-        private string ReadPassword()
-        {
-            _sb.Clear();
-            while (true)
-            {
-                var info = Console.ReadKey(true);
-                if (info.Key == ConsoleKey.Enter)
-                {
-                    Console.WriteLine();
-                    break;
-                }
-
-                if (info.Key == ConsoleKey.Backspace)
-                {
-                    if (_sb.Length <= 0)
-                    {
-                        continue;
-                    }
-
-                    _sb.Remove(_sb.Length - 1, 1);
-                    Console.Write("\b \b");
-                }
-                else
-                {
-                    _sb.Append(info.KeyChar);
-                    Console.Write("*");
-                }
-            }
-
-            return _sb.ToString();
         }
     }
 }
