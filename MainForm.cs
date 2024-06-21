@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
 using WinSSHCopyId.Engine;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace WinSSHCopyId
 {
@@ -71,8 +69,6 @@ namespace WinSSHCopyId
             Log(msg);
         }
 
-        #region "METHOD"
-
         private void Log(string msg)
         {
             _sb.Clear();
@@ -89,7 +85,10 @@ namespace WinSSHCopyId
         {
             try
             {
-                if (!File.Exists(_filePath)) return;
+                if (!File.Exists(_filePath))
+                {
+                    return;
+                }
 
                 var content = File.ReadAllLines(_filePath);
                 if (content.Length > 0) txtHost.Text = content[0];
@@ -126,7 +125,5 @@ namespace WinSSHCopyId
         {
             txtConsole.Clear();
         }
-
-        #endregion "METHOD"
     }
 }
