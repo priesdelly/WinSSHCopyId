@@ -1,7 +1,5 @@
 ﻿using Renci.SshNet;
-
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace WinSSHCopyId.Engine
