@@ -1,6 +1,6 @@
-# 📦📦📦 Archiving this project 📦📦📦
+# 📦📦📦 Project Archiving Notice 📦📦📦
 
-I will be archiving this project on GitHub as it deviated from the original plan of having a single-file program. I chose the wrong technology due to my limited knowledge and insufficient research. The current release of the program is still functional, but it includes an additional DLL file. I will not be fixing any bugs or adding new features to it.
+I am archiving this project on GitHub as it deviated from the original plan of having a single-file program. I chose the wrong technology due to my limited knowledge and insufficient research. The current release of the program is still functional, but it includes an additional DLL file. I will not be fixing any bugs or adding new features to it.
 
 In the future, I hope to develop an ssh-copy-id tool for Windows using Go, a language I am more comfortable with. However, this will depend on my availability. In fact, I already have a private project written in Go, but it is not yet complete.
 
